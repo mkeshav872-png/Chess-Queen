@@ -1,0 +1,1100 @@
+Chess queen · HTML
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <title>Chess Queen by Keshav Mishra</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            box-sizing: border-box;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px)
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0
+        }
+
+        body {
+            --s: min(94vw, calc(100vh - 340px), 600px);
+            --lt: #f0d9b5;
+            --dk: #b58863;
+            --pw: #fff;
+            --sw: #2b2b2b;
+            --pb: #262626;
+            --sb: #e8e8e8;
+            background: radial-gradient(circle at 50% 0, #5b3fa8, #1d0f45 70%);
+            font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            overflow: hidden;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation
+        }
+
+        @supports(height:100dvh) {
+            body {
+                --s: min(94vw, calc(100dvh - 340px), 600px)
+            }
+        }
+
+        body[data-th="1"] {
+            background: radial-gradient(circle at 50% 0, #ff9800, #6a1b00 75%);
+            --lt: #ffe0b2;
+            --dk: #e65100
+        }
+
+        body[data-th="2"] {
+            background: radial-gradient(circle at 50% 0, #ff80ab, #6a1b4d 75%);
+            --lt: #fce4ec;
+            --dk: #ec407a
+        }
+
+        body[data-th="3"] {
+            background: radial-gradient(circle at 50% 0, #66bb6a, #0d3b1e 75%);
+            --lt: #e8f5e9;
+            --dk: #43a047
+        }
+
+        body[data-th="4"] {
+            background: radial-gradient(circle at 50% 0, #29b6f6, #01283f 75%);
+            --lt: #e1f5fe;
+            --dk: #0288d1
+        }
+
+        body[data-th="5"] {
+            background: radial-gradient(circle at 50% 0, #7c4dff, #020014 75%);
+            --lt: #b39ddb;
+            --dk: #4527a0
+        }
+
+        body[data-ps="1"] {
+            --pw: #ffd54f;
+            --sw: #5d3a00;
+            --pb: #3b1d6e;
+            --sb: #ffd54f
+        }
+
+        .ttl {
+            font-weight: 900;
+            letter-spacing: 3px;
+            font-size: clamp(20px, 4vh, 30px);
+            background: linear-gradient(90deg, #ffe082, #ff8a65);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            line-height: 1
+        }
+
+        .ttl,
+        .card h2 {
+            animation: glow 2s infinite alternate
+        }
+
+        @keyframes glow {
+            to {
+                filter: drop-shadow(0 0 10px #ffb300)
+            }
+        }
+
+        .by {
+            font-size: 12px;
+            opacity: .75;
+            margin-top: -4px;
+            letter-spacing: 1px
+        }
+
+        .pb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: var(--s);
+            box-sizing: border-box;
+            padding: 3px 10px;
+            border-radius: 14px;
+            background: #ffffff18;
+            border: 2px solid transparent;
+            font-size: 13px;
+            opacity: .6;
+            transition: .25s;
+            min-height: 30px
+        }
+
+        .pb.on {
+            opacity: 1;
+            border-color: #ffd54f;
+            box-shadow: 0 0 14px #ffd54f88
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid #fff8;
+            flex: none
+        }
+
+        .tr {
+            flex: 1;
+            font-size: 16px;
+            letter-spacing: -3px;
+            white-space: nowrap;
+            overflow: hidden
+        }
+
+        .tr .w {
+            color: #fff
+        }
+
+        .tr .b {
+            color: #222;
+            -webkit-text-stroke: .6px #ddd
+        }
+
+        #board {
+            position: relative;
+            width: var(--s);
+            height: var(--s);
+            border-radius: 8px;
+            box-shadow: 0 12px 40px #000a, 0 0 0 4px #1b1b1b;
+            overflow: hidden
+        }
+
+        #grid {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            grid-template: repeat(8, 1fr)/repeat(8, 1fr)
+        }
+
+        .q {
+            position: relative;
+            background: var(--lt);
+            cursor: pointer
+        }
+
+        .q.d {
+            background: var(--dk)
+        }
+
+        .q i {
+            position: absolute;
+            font-style: normal;
+            font-size: calc(var(--s)/42);
+            font-weight: 700;
+            color: var(--dk);
+            opacity: .85
+        }
+
+        .q.d i {
+            color: var(--lt)
+        }
+
+        .q.lm::before,
+        .q.sel::before,
+        .q.hint::before,
+        .q.chk::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: #ffeb3b77
+        }
+
+        .q.sel::before {
+            background: #69f0aeaa
+        }
+
+        .q.hint::before {
+            background: #40c4ffaa;
+            animation: ck .5s infinite alternate
+        }
+
+        .q.chk::before {
+            background: radial-gradient(circle, #f44336, #f4433600 75%);
+            animation: ck .5s infinite alternate
+        }
+
+        @keyframes ck {
+            to {
+                opacity: .4
+            }
+        }
+
+        .q.mv::after {
+            content: "";
+            position: absolute;
+            inset: 35%;
+            border-radius: 50%;
+            background: #1b5e20aa;
+            animation: dp .7s infinite alternate
+        }
+
+        .q.cp::after {
+            content: "";
+            position: absolute;
+            inset: 4%;
+            border-radius: 50%;
+            border: 4px solid #e53935cc;
+            animation: dp .7s infinite alternate
+        }
+
+        @keyframes dp {
+            to {
+                transform: scale(1.18)
+            }
+        }
+
+        .pc {
+            position: absolute;
+            width: 12.5%;
+            height: 12.5%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: calc(var(--s)/9.4);
+            line-height: 1;
+            pointer-events: none;
+            z-index: 5;
+            transition: left .3s cubic-bezier(.3, 1.3, .5, 1), top .3s cubic-bezier(.3, 1.3, .5, 1), transform .2s, opacity .35s
+        }
+
+        .pc.w {
+            color: var(--pw);
+            -webkit-text-stroke: 1.4px var(--sw);
+            text-shadow: 0 3px 4px #0009
+        }
+
+        .pc.b {
+            color: var(--pb);
+            -webkit-text-stroke: 1.4px var(--sb);
+            text-shadow: 0 3px 4px #0009
+        }
+
+        .pc.sel {
+            transform: translateY(-12%) scale(1.18);
+            z-index: 8
+        }
+
+        .pc.cap {
+            opacity: 0;
+            transform: scale(.2) rotate(50deg)
+        }
+
+        .pc.fall {
+            transform: rotate(88deg) translateY(10%);
+            opacity: .7
+        }
+
+        .pc.win {
+            animation: wn .6s infinite alternate;
+            filter: drop-shadow(0 0 10px gold)
+        }
+
+        @keyframes wn {
+            to {
+                transform: translateY(-10%) scale(1.15)
+            }
+        }
+
+        #board.shake {
+            animation: sh .4s
+        }
+
+        @keyframes sh {
+            20% {
+                transform: translate(-5px, 2px)
+            }
+
+            40% {
+                transform: translate(5px, -2px)
+            }
+
+            60% {
+                transform: translate(-3px, -2px)
+            }
+
+            80% {
+                transform: translate(2px, 2px)
+            }
+        }
+
+        .pt {
+            position: absolute;
+            width: 2.2%;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background: var(--pc);
+            pointer-events: none;
+            z-index: 50;
+            transform: translate(-50%, -50%);
+            animation: pt .7s ease-out forwards
+        }
+
+        @keyframes pt {
+            to {
+                transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0);
+                opacity: 0
+            }
+        }
+
+        .em {
+            position: absolute;
+            left: 50%;
+            font-size: calc(var(--s)/8);
+            z-index: 60;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            animation: em 1.7s ease-out forwards
+        }
+
+        @keyframes em {
+            0% {
+                transform: translate(-50%, -50%) scale(.3);
+                opacity: 0
+            }
+
+            20% {
+                transform: translate(-50%, -80%) scale(1.3);
+                opacity: 1
+            }
+
+            100% {
+                transform: translate(-50%, -240%) scale(1);
+                opacity: 0
+            }
+        }
+
+        .em.bub {
+            font-size: calc(var(--s)/24);
+            background: #fff;
+            color: #222;
+            padding: 6px 12px;
+            border-radius: 14px;
+            white-space: nowrap;
+            font-weight: 700;
+            box-shadow: 0 4px 10px #0007
+        }
+
+        .bn {
+            position: absolute;
+            left: 50%;
+            top: 45%;
+            z-index: 70;
+            pointer-events: none;
+            font-weight: 900;
+            font-size: calc(var(--s)/7);
+            color: #fff;
+            text-shadow: 0 0 22px #f44336, 0 4px 0 #b71c1c;
+            transform: translate(-50%, -50%);
+            animation: bn 1.2s forwards;
+            white-space: nowrap
+        }
+
+        @keyframes bn {
+            0% {
+                transform: translate(-50%, -50%) scale(.2);
+                opacity: 0
+            }
+
+            20% {
+                transform: translate(-50%, -50%) scale(1.25);
+                opacity: 1
+            }
+
+            75% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1.1);
+                opacity: 0
+            }
+        }
+
+        #log {
+            width: var(--s);
+            font-size: 12px;
+            white-space: nowrap;
+            overflow-x: auto;
+            opacity: .85;
+            height: 18px;
+            scrollbar-width: none
+        }
+
+        #log span {
+            margin-right: 8px
+        }
+
+        #msg {
+            font-size: 15px;
+            font-weight: 700;
+            min-height: 22px;
+            text-align: center
+        }
+
+        #msg.p {
+            animation: mp .35s
+        }
+
+        @keyframes mp {
+            from {
+                transform: scale(.7);
+                opacity: 0
+            }
+        }
+
+        .tl {
+            display: flex;
+            gap: 8px
+        }
+
+        .tl button {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: none;
+            background: #ffffff25;
+            font-size: 18px;
+            color: #fff;
+            cursor: pointer
+        }
+
+        .tl button:active {
+            transform: scale(1.3)
+        }
+
+        #chat {
+            position: fixed;
+            left: 50%;
+            bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+            transform: translateX(-50%);
+            width: min(94vw, 420px);
+            box-sizing: border-box;
+            background: #2a1a6af2;
+            border: 1px solid #fff3;
+            border-radius: 18px;
+            padding: 12px;
+            z-index: 90;
+            box-shadow: 0 10px 40px #000c;
+            display: none;
+            max-height: 60vh;
+            overflow: auto
+        }
+
+        #chat.on {
+            display: block;
+            animation: cp .25s
+        }
+
+        @keyframes cp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px)
+            }
+        }
+
+        #chat .eg,
+        #chat .pg {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center
+        }
+
+        #chat .eg button {
+            font-size: 24px;
+            background: #ffffff1a;
+            border: none;
+            border-radius: 12px;
+            width: 44px;
+            height: 44px
+        }
+
+        #chat .pg {
+            margin-top: 8px
+        }
+
+        #chat .pg button {
+            background: #ffffff1f;
+            border: 1px solid #fff3;
+            border-radius: 16px;
+            padding: 7px 12px;
+            font-size: 13px;
+            color: #fff
+        }
+
+        .ov {
+            position: fixed;
+            inset: 0;
+            background: #000a;
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100
+        }
+
+        .ov.hide {
+            display: none
+        }
+
+        .card {
+            background: linear-gradient(#4a3596, #22145a);
+            padding: 24px 22px;
+            border-radius: 22px;
+            text-align: center;
+            box-shadow: 0 20px 60px #000c, inset 0 1px #fff3;
+            width: min(92vw, 360px);
+            max-height: 94vh;
+            overflow: auto;
+            box-sizing: border-box;
+            animation: pop .4s cubic-bezier(.2, 1.5, .5, 1)
+        }
+
+        @keyframes pop {
+            from {
+                transform: scale(.6);
+                opacity: 0
+            }
+        }
+
+        .card h2 {
+            margin: 0;
+            font-size: 30px;
+            letter-spacing: 3px;
+            background: linear-gradient(90deg, #ffe082, #ff8a65);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent
+        }
+
+        .card p {
+            margin: 2px 0 8px;
+            font-size: 13px;
+            opacity: .8
+        }
+
+        .card h4 {
+            margin: 12px 0 6px;
+            font-size: 13px;
+            opacity: .8;
+            font-weight: 600
+        }
+
+        .row {
+            display: flex;
+            gap: 6px;
+            justify-content: center
+        }
+
+        .opt {
+            flex: 1;
+            padding: 9px 2px;
+            border-radius: 12px;
+            border: 2px solid #fff3;
+            background: #ffffff14;
+            font: inherit;
+            font-size: 12px;
+            font-weight: 700;
+            color: #fff;
+            cursor: pointer
+        }
+
+        .opt.sel {
+            background: #ffb300;
+            border-color: #fff;
+            color: #2a1a00
+        }
+
+        .go {
+            margin-top: 12px;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 14px;
+            font: inherit;
+            font-size: 17px;
+            font-weight: 800;
+            color: #fff;
+            cursor: pointer;
+            background: linear-gradient(#69d36e, #2e9e44);
+            box-shadow: 0 5px 0 #1b6b2b
+        }
+
+        .go:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #1b6b2b
+        }
+
+        .go.r {
+            background: linear-gradient(#ef5350, #c62828);
+            box-shadow: 0 5px 0 #7f1717
+        }
+
+        .go.o {
+            background: linear-gradient(#ffca28, #f57c00);
+            box-shadow: 0 5px 0 #a35200
+        }
+
+        #spl {
+            z-index: 200;
+            background: radial-gradient(circle, #5b3fa8, #12082e);
+            flex-direction: column;
+            gap: 6px;
+            transition: opacity .6s
+        }
+
+        #spl.out {
+            opacity: 0;
+            pointer-events: none
+        }
+
+        #spl .big {
+            font-size: 76px;
+            animation: bob 1.2s ease-in-out infinite alternate
+        }
+
+        @keyframes bob {
+            to {
+                transform: translateY(-14px) rotate(8deg)
+            }
+        }
+
+        .lb {
+            width: 210px;
+            height: 8px;
+            background: #fff2;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 14px
+        }
+
+        .lb i {
+            display: block;
+            height: 100%;
+            background: linear-gradient(90deg, #ffe082, #ff8a65);
+            animation: ld2 1.8s forwards
+        }
+
+        @keyframes ld2 {
+            from {
+                width: 0
+            }
+
+            to {
+                width: 100%
+            }
+        }
+
+        .cf {
+            position: fixed;
+            top: -20px;
+            width: 9px;
+            height: 15px;
+            z-index: 101;
+            pointer-events: none;
+            animation: fall linear forwards
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(110vh) rotate(720deg)
+            }
+        }
+
+        @media (max-height:520px) and (orientation:landscape) {
+            body {
+                --s: calc(100vh - 16px);
+                flex-direction: column;
+                flex-wrap: wrap;
+                align-content: center;
+                gap: 6px 18px
+            }
+
+            #board {
+                order: -1
+            }
+
+            .pb,
+            #log {
+                width: 250px
+            }
+
+            .ttl {
+                font-size: 24px
+            }
+        }
+
+        @media (max-height:520px) and (orientation:landscape) {
+            @supports(height:100dvh) {
+                body {
+                    --s: calc(100dvh - 16px)
+                }
+            }
+        }
+
+        .ad {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: #fff;
+            text-align: left;
+            margin-top: 14px;
+            padding: 10px 12px;
+            border-radius: 16px;
+            background: linear-gradient(120deg, #3949ab, #8e24aa);
+            border: 1px solid #fff4;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 6px 18px #0006
+        }
+
+        .ad::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -60%;
+            width: 40%;
+            height: 100%;
+            background: linear-gradient(100deg, transparent, #fff5, transparent);
+            transform: skewX(-20deg);
+            animation: sh2 2.6s infinite
+        }
+
+        @keyframes sh2 {
+            to {
+                left: 130%
+            }
+        }
+
+        .ad .ic {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            flex: none;
+            background: conic-gradient(#e53935 0 25%, #2e9e44 0 50%, #f9b600 0 75%, #1e88e5 0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            animation: ab 1.4s ease-in-out infinite alternate
+        }
+
+        @keyframes ab {
+            to {
+                transform: translateY(-4px) rotate(-8deg)
+            }
+        }
+
+        .ad b {
+            display: block;
+            font-size: 15px;
+            letter-spacing: 1px
+        }
+
+        .ad small {
+            display: block;
+            font-size: 11px;
+            opacity: .9;
+            line-height: 1.35
+        }
+
+        .ad em {
+            position: absolute;
+            top: 3px;
+            right: 8px;
+            font-size: 9px;
+            font-style: normal;
+            opacity: .75;
+            border: 1px solid #fff6;
+            padding: 0 4px;
+            border-radius: 4px
+        }
+
+        .ad u {
+            margin: 6px 0 0 auto;
+            text-decoration: none;
+            background: #69d36e;
+            color: #10300f;
+            font-weight: 800;
+            font-size: 12px;
+            padding: 7px 11px;
+            border-radius: 10px;
+            flex: none;
+            box-shadow: 0 3px 0 #1b6b2b
+        }
+
+        #adc {
+            position: fixed;
+            left: 14px;
+            bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+            width: 270px;
+            z-index: 30;
+            display: none
+        }
+
+        @media (min-width:1000px) {
+            #adc {
+                display: block
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="ttl">CHESS QUEEN</div>
+    <div class="by">by Keshav Mishra</div>
+    <div class="pb" id="pt"></div>
+    <div id="board">
+        <div id="grid"></div>
+    </div>
+    <div class="pb" id="pbm"></div>
+    <div id="log"></div>
+    <div id="msg">Welcome!</div>
+    <div class="tl" id="emo"><button>😂</button><button>😎</button><button>😭</button><button>👏</button><button
+            id="chb">💬</button></div>
+    <div class="tl"><button id="th" title="World">🎨</button><button id="ps" title="Piece style">♞</button><button
+            id="hn" title="Hint">💡</button><button id="un" title="Undo">↩</button><button id="fl"
+            title="Flip board">⇅</button><button id="sn" title="Sound">🔊</button><button id="mn"
+            title="Menu">☰</button></div>
+    <div id="chat"></div>
+    <div id="spl" class="ov">
+        <div class="big">♛</div>
+        <div class="ttl" style="font-size:40px">CHESS QUEEN</div>
+        <div class="by">by Keshav Mishra</div>
+        <div class="lb"><i></i></div>
+    </div>
+    <div id="menu" class="ov">
+        <div class="card">
+            <h2>CHESS QUEEN</h2>
+            <p>by Keshav Mishra</p>
+            <h4>Mode</h4>
+            <div class="row"><button class="opt" data-g="m" data-v="cpu">vs Computer</button><button class="opt"
+                    data-g="m" data-v="pvp">Pass &amp; Play</button></div>
+            <h4>Level (vs Computer)</h4>
+            <div class="row"><button class="opt" data-g="l" data-v="0">😊 Easy</button><button class="opt" data-g="l"
+                    data-v="1">🙂 Medium</button><button class="opt" data-g="l" data-v="2">😈 Hard</button><button
+                    class="opt" data-g="l" data-v="3">👑 Pro</button></div>
+            <h4>Play as</h4>
+            <div class="row"><button class="opt" data-g="s" data-v="w">⚪ White</button><button class="opt" data-g="s"
+                    data-v="b">⚫ Black</button><button class="opt" data-g="s" data-v="r">🎲 Random</button></div>
+            <h4>Piece Style</h4>
+            <div class="row"><button class="opt" data-g="p" data-v="0">⚪ White</button><button class="opt" data-g="p"
+                    data-v="1">🟡 Yellow</button></div>
+            <button class="go" id="start">▶ START</button>
+        </div>
+    </div>
+    <div id="pz" class="ov hide">
+        <div class="card">
+            <h2>PAUSED</h2>
+            <p>Game is on hold</p><button class="go" id="rs">▶ Resume</button><button class="go o" id="rt">🔄
+                Restart</button><button class="go r" id="rg">🏳 Resign</button><button class="go r" id="hm"
+                style="background:linear-gradient(#78909c,#455a64);box-shadow:0 5px 0 #263238">🏠 Main Menu</button>
+        </div>
+    </div>
+    <div id="pm" class="ov hide">
+        <div class="card">
+            <h2 style="font-size:22px">PROMOTE</h2>
+            <div class="row" id="pmb" style="margin-top:10px"></div>
+        </div>
+    </div>
+    <div id="end" class="ov hide">
+        <div class="card">
+            <h2 id="wt">🏆</h2>
+            <p id="wd"></p><button class="go" id="again">Play Again</button><button class="go r" id="hm2"
+                style="background:linear-gradient(#78909c,#455a64);box-shadow:0 5px 0 #263238">🏠 Main Menu</button>
+        </div>
+    </div>
+    <script>
+        const $ = id => document.getElementById(id); let PZ = 0;
+        const sleep = async ms => { await new Promise(r => setTimeout(r, ms)); while (PZ) await new Promise(r => setTimeout(r, 120)) };
+        const G = { K: '♚\uFE0E', Q: '♛\uFE0E', R: '♜\uFE0E', B: '♝\uFE0E', N: '♞\uFE0E', P: '♟\uFE0E' }, V = { P: 100, N: 320, B: 330, R: 500, Q: 900, K: 0 }, I = { Q: 1, R: 2, B: 2, N: 2, P: 8 };
+        const D = { N: [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]], K: [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]], B: [[-1, -1], [-1, 1], [1, -1], [1, 1]], R: [[-1, 0], [1, 0], [0, -1], [0, 1]] };
+        const B0 = ('rnbqkbnr' + 'pppppppp' + '.'.repeat(32) + 'PPPPPPPP' + 'RNBQKBNR').split('').map(x => x == '.' ? '' : x);
+        const nm = i => 'abcdefgh'[i & 7] + (8 - (i >> 3)), rnd = a => a[Math.random() * a.length | 0], isW = p => p < 'a';
+        const EM = ['😂', '😎', '😭', '👏', '😍', '🥳', '🤯', '😱', '😡', '🙏', '🔥', '💪', '🤝', '😈', '🥶', '🤔', '😴', '💀', '🎉', '👑', '😜', '🤡', '🥲', '😏'], PH = ['Good move! 👏', 'Nice try 😏', 'Oops! 😅', 'Well played 🤝', 'Check! 😈', 'Brilliant! ✨', 'Hurry up ⏳', 'GG 🤝'];
+        let S = null, AC, mute = false, TH = 0, PS = 0, LV = 2, MD = 'cpu', SD = 'w', sq = [], pcs = [];
+        function beep(f, d = .08, t = 'sine') { if (mute) return; try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); if (AC.state == 'suspended') AC.resume(); const o = AC.createOscillator(), g = AC.createGain(); o.type = t; o.frequency.value = f; g.gain.setValueAtTime(.1, AC.currentTime); g.gain.exponentialRampToValueAtTime(.001, AC.currentTime + d); o.connect(g); g.connect(AC.destination); o.start(); o.stop(AC.currentTime + d) } catch (e) { } }
+        /* ---------- chess engine ---------- */
+        function att(b, sq, w) {
+            const r = sq >> 3, c = sq & 7, P = w ? 'P' : 'p', pr = r + (w ? 1 : -1);
+            if (pr >= 0 && pr < 8) { if (c > 0 && b[pr * 8 + c - 1] == P) return 1; if (c < 7 && b[pr * 8 + c + 1] == P) return 1 }
+            const at = (rr, cc) => rr >= 0 && rr < 8 && cc >= 0 && cc < 8 ? b[rr * 8 + cc] : null;
+            for (const [dr, dc] of D.N) if (at(r + dr, c + dc) == (w ? 'N' : 'n')) return 1;
+            for (const [dr, dc] of D.K) if (at(r + dr, c + dc) == (w ? 'K' : 'k')) return 1;
+            for (const [ds, t] of [[D.B, 'B'], [D.R, 'R']]) for (const [dr, dc] of ds) { let rr = r + dr, cc = c + dc, x; while ((x = at(rr, cc)) === '') rr += dr, cc += dc; if (x && isW(x) == w && (x.toUpperCase() == t || x.toUpperCase() == 'Q')) return 1 }
+            return 0
+        }
+        function gen(s) {
+            const b = s.b, w = s.t == 'w', o = [];
+            for (let i = 0; i < 64; i++) {
+                const p = b[i]; if (!p || isW(p) != w) continue; const r = i >> 3, c = i & 7, u = p.toUpperCase();
+                if (u == 'P') {
+                    const d = w ? -1 : 1, r1 = r + d, add = (to, cap, ep) => { if (r1 == (w ? 0 : 7)) for (const q of 'QRBN') o.push({ f: i, t: to, p: q, cap }); else o.push({ f: i, t: to, cap, ep }) };
+                    if (!b[r1 * 8 + c]) { add(r1 * 8 + c); if (r == (w ? 6 : 1) && !b[(r1 + d) * 8 + c]) o.push({ f: i, t: (r1 + d) * 8 + c, dp: 1 }) }
+                    for (const dc of [-1, 1]) { const cc = c + dc; if (cc < 0 || cc > 7) continue; const to = r1 * 8 + cc, x = b[to]; if (x && isW(x) != w) add(to, 1); else if (!x && to == s.ep) add(to, 1, 1) }
+                }
+                else if (u == 'N' || u == 'K') {
+                    for (const [dr, dc] of D[u]) { const rr = r + dr, cc = c + dc; if (rr < 0 || rr > 7 || cc < 0 || cc > 7) continue; const to = rr * 8 + cc, x = b[to]; if (!x || isW(x) != w) o.push({ f: i, t: to, cap: !!x }) }
+                    if (u == 'K') {
+                        const h = w ? 56 : 0; if (i == h + 4 && !att(b, i, !w)) {
+                            const R = w ? 'R' : 'r';
+                            if (s.c.includes(w ? 'K' : 'k') && !b[h + 5] && !b[h + 6] && b[h + 7] == R && !att(b, h + 5, !w) && !att(b, h + 6, !w)) o.push({ f: i, t: h + 6, cs: 1 });
+                            if (s.c.includes(w ? 'Q' : 'q') && !b[h + 1] && !b[h + 2] && !b[h + 3] && b[h] == R && !att(b, h + 3, !w) && !att(b, h + 2, !w)) o.push({ f: i, t: h + 2, cs: 2 })
+                        }
+                    }
+                }
+                else for (const [dr, dc] of u == 'B' ? D.B : u == 'R' ? D.R : D.B.concat(D.R)) { let rr = r + dr, cc = c + dc; while (rr >= 0 && rr < 8 && cc >= 0 && cc < 8) { const to = rr * 8 + cc, x = b[to]; if (!x) o.push({ f: i, t: to }); else { if (isW(x) != w) o.push({ f: i, t: to, cap: 1 }); break } rr += dr; cc += dc } }
+            }
+            return o
+        }
+        function app(s, m) {
+            const b = s.b.slice(), p = b[m.f], w = s.t == 'w'; let ep = -1, c = s.c, hm = s.hm + 1; if (p.toUpperCase() == 'P' || b[m.t]) hm = 0;
+            b[m.t] = m.p ? (w ? m.p : m.p.toLowerCase()) : p; b[m.f] = ''; if (m.ep) b[m.t + (w ? 8 : -8)] = ''; if (m.dp) ep = (m.f + m.t) / 2;
+            if (m.cs) { const h = w ? 56 : 0; if (m.cs == 1) { b[h + 5] = b[h + 7]; b[h + 7] = '' } else { b[h + 3] = b[h]; b[h] = '' } }
+            if (p == 'K') c = c.replace('K', '').replace('Q', ''); if (p == 'k') c = c.replace('k', '').replace('q', '');
+            for (const [q, x] of [[56, 'Q'], [63, 'K'], [0, 'q'], [7, 'k']]) if (m.f == q || m.t == q) c = c.replace(x, '');
+            return { b, t: w ? 'b' : 'w', c, ep, hm }
+        }
+        const inCheck = s => att(s.b, s.b.indexOf(s.t == 'w' ? 'K' : 'k'), s.t != 'w');
+        function legal(s) { return gen(s).filter(m => { const n = app(s, m); return !att(n.b, n.b.indexOf(s.t == 'w' ? 'K' : 'k'), n.t == 'w') }) }
+        const key = s => s.b.join('|') + s.t + s.c + s.ep;
+        const matOf = (b, c) => b.reduce((a, p) => a + (p && isW(p) == (c == 'w') ? V[p.toUpperCase()] : 0), 0);
+        function ev(s) { let v = 0; for (let i = 0; i < 64; i++) { const p = s.b[i]; if (!p) continue; const u = p.toUpperCase(), w = isW(p), r = i >> 3, c = i & 7, ce = 7 - Math.abs(r - 3.5) - Math.abs(c - 3.5); let x = V[u]; if (u == 'P') x += (w ? 6 - r : r - 1) * 8 + ce * 2; else if (u != 'R' && u != 'K') x += ce * 3; v += w ? x : -x } return v }
+        function nega(s, d, a, b) {
+            if (!d) { const e = ev(s); return s.t == 'w' ? e : -e } const ms = legal(s); if (!ms.length) return inCheck(s) ? -99999 - d : 0;
+            ms.sort((x, y) => (y.cap ? 1 : 0) - (x.cap ? 1 : 0)); for (const m of ms) { const v = -nega(app(s, m), d - 1, -b, -a); if (v >= b) return b; if (v > a) a = v } return a
+        }
+        function think(s, lv) {
+            const ms = legal(s); if (lv == 0) { const c = ms.filter(m => m.cap); return rnd(Math.random() < .5 && c.length ? c : ms) }
+            const d = [0, 1, 2, 3][lv], nz = [0, 80, 15, 0][lv]; let best = ms[0], bv = -1e9; ms.sort((x, y) => (y.cap ? 1 : 0) - (x.cap ? 1 : 0));
+            for (const m of ms) { const v = -nega(app(s, m), d - 1, -1e9, nz ? 1e9 : -bv) + Math.random() * nz; if (v > bv) { bv = v; best = m } } return best
+        }
+        const insuf = s => { const x = s.b.filter(p => p && p.toUpperCase() != 'K'); return !x.length || (x.length == 1 && /[NBnb]/.test(x[0])) };
+        /* ---------- ui helpers ---------- */
+        function msg(t) { const m = $('msg'); m.textContent = t; m.classList.remove('p'); void m.offsetWidth; m.classList.add('p') }
+        const rc = i => { let r = i >> 3, c = i & 7; if (S.flip) { r = 7 - r; c = 7 - c } return [r, c] };
+        function place(x) { const [r, c] = rc(x.sq); x.el.style.left = c * 12.5 + '%'; x.el.style.top = r * 12.5 + '%' }
+        function addPc(p, i) { const el = document.createElement('div'); el.className = 'pc ' + (isW(p) ? 'w' : 'b'); el.textContent = G[p.toUpperCase()]; const x = { el, sq: i }; place(x); $('board').appendChild(el); pcs.push(x) }
+        function rebuild() {
+            const g = $('grid'); let h = ''; for (let k = 0; k < 64; k++) { const i = S.flip ? 63 - k : k, r = k >> 3, c = k & 7; h += `<div class="q${(r + c) % 2 ? ' d' : ''}" data-i="${i}">${c == 0 ? `<i style="left:2px;top:1px">${8 - (i >> 3)}</i>` : ''}${r == 7 ? `<i style="right:2px;bottom:0">${'abcdefgh'[i & 7]}</i>` : ''}</div>` }
+            g.innerHTML = h; sq = [];[...g.children].forEach(e => sq[+e.dataset.i] = e); pcs.forEach(x => x.el.remove()); pcs = []; S.s.b.forEach((p, i) => { if (p) addPc(p, i) })
+        }
+        function render() {
+            if (!S) return; const s = S.s; sq.forEach((e, i) => { const m = S.mv.find(x => x.t == i), L = e.classList, cp = !!m && !!(s.b[i] || m.ep); L.toggle('lm', !!S.last && S.last.includes(i)); L.toggle('sel', S.sel == i); L.toggle('cp', cp); L.toggle('mv', !!m && !cp); L.toggle('hint', !!S.hint && S.hint.includes(i)); L.toggle('chk', false) });
+            if (inCheck(s) && !S.over) sq[s.b.indexOf(s.t == 'w' ? 'K' : 'k')].classList.add('chk'); pcs.forEach(x => x.el.classList.toggle('sel', x.sq == S.sel))
+        }
+        const nameOf = c => S.cpu == c ? 'Computer ' + ['😊', '🙂', '😈', '👑'][S.lv] : S.cpu ? 'You' : c == 'w' ? 'White' : 'Black';
+        function upd() {
+            const s = S.s, top = S.flip ? 'w' : 'b', bot = top == 'w' ? 'b' : 'w', cnt = c => { const o = {}; for (const p of s.b) if (p && isW(p) == (c == 'w')) { const u = p.toUpperCase(); o[u] = (o[u] || 0) + 1 } return o };
+            const bar = c => {
+                const e = c == 'w' ? 'b' : 'w', o = cnt(e), cap = Object.keys(I).map(k => `<span class="${e}">${G[k].repeat(Math.max(0, I[k] - (o[k] || 0)))}</span>`).join(''), d = (matOf(s.b, c) - matOf(s.b, e)) / 100 | 0;
+                return `<i class="dot" style="background:${c == 'w' ? '#fff' : '#222'}"></i><b>${nameOf(c)}</b><span class="tr">${cap}</span><small>${d > 0 ? '+' + d : ''}</small>`
+            };
+            $('pt').innerHTML = bar(top); $('pbm').innerHTML = bar(bot); $('pt').classList.toggle('on', s.t == top && !S.over); $('pbm').classList.toggle('on', s.t == bot && !S.over);
+            $('log').innerHTML = S.log.map(x => `<span>${x}</span>`).join(''); $('log').scrollLeft = 1e5;
+            if (!S.busy && !S.over) msg(S.cpu == s.t ? 'Computer is thinking…' : S.cpu ? 'Your move' : (s.t == 'w' ? 'White' : 'Black') + ' to move')
+        }
+        function burst(i, col, n = 10, sp = 40) { const [r, c] = rc(i), B = $('board'); for (let k = 0; k < n; k++) { const e = document.createElement('div'), a = Math.random() * 6.28, d = sp * (.5 + Math.random()); e.className = 'pt'; e.style.cssText = `left:${(c + .5) * 12.5}%;top:${(r + .5) * 12.5}%;--pc:${col};--dx:${Math.cos(a) * d}px;--dy:${Math.sin(a) * d}px`; B.appendChild(e); setTimeout(() => e.remove(), 750) } }
+        function banner(t) { const e = document.createElement('div'); e.className = 'bn'; e.textContent = t; $('board').appendChild(e); setTimeout(() => e.remove(), 1250) }
+        function react(side, t) { if (!S || !side) return; const e = document.createElement('div'), top = (side == 'b') != S.flip; e.className = 'em' + ([...t].length > 2 ? ' bub' : ''); e.textContent = t; e.style.top = (top ? 16 : 84) + '%'; $('board').appendChild(e); beep(700, .08, 'triangle'); setTimeout(() => e.remove(), 1800) }
+        function say(side, a, pr = 1) { if (side && Math.random() < pr) setTimeout(() => react(side, rnd(a)), 300 + Math.random() * 500) }
+        const hside = () => S.cpu ? (S.cpu == 'w' ? 'b' : 'w') : S.s.t;
+        /* ---------- game flow ---------- */
+        function start() {
+            PZ = 0;['pz', 'end', 'menu', 'pm'].forEach(x => $(x).classList.add('hide')); document.querySelectorAll('.cf').forEach(e => e.remove());
+            const side = SD == 'r' ? rnd(['w', 'b']) : SD;
+            S = { s: { b: B0.slice(), t: 'w', c: 'KQkq', ep: -1, hm: 0 }, cpu: MD == 'cpu' ? (side == 'w' ? 'b' : 'w') : null, flip: MD == 'cpu' && side == 'b', sel: -1, mv: [], last: null, hint: null, hist: [], log: [], keys: [], over: false, busy: false, lv: LV };
+            S.keys = [key(S.s)]; rebuild(); render(); upd(); say(S.cpu, ['Good luck! 🤝', '😎'], .7); if (S.cpu == 'w') cpuGo()
+        }
+        function tap(i) {
+            if (!S || S.over || S.busy || PZ) return; const s = S.s; if (S.cpu == s.t) return; S.hint = null; const p = s.b[i], m = S.mv.filter(x => x.t == i);
+            if (S.sel >= 0 && m.length) { if (m[0].p) return promo(m); return play(m[0]) }
+            if (p && isW(p) == (s.t == 'w')) { S.sel = i; S.mv = legal(s).filter(x => x.f == i); beep(520, .04) } else { S.sel = -1; S.mv = [] } render()
+        }
+        function promo(ms) {
+            $('pmb').innerHTML = ms.map((m, k) => `<button class="opt" data-k="${k}" style="font-size:40px">${G[m.p]}</button>`).join(''); $('pm').classList.remove('hide');
+            $('pmb').onclick = e => { const b = e.target.closest('button'); if (!b) return; $('pm').classList.add('hide'); play(ms[+b.dataset.k]) }
+        }
+        async function play(m) {
+            const A = S, s = A.s, mover = s.t, w = mover == 'w', p = s.b[m.f], u = p.toUpperCase(), cs = m.ep ? m.t + (w ? 8 : -8) : m.t, cp = s.b[cs], n = app(s, m), ms = legal(n), ck = inCheck(n), kk = key(n);
+            A.busy = true; A.sel = -1; A.mv = []; A.hint = null; A.hist.push({ s, last: A.last, log: A.log.length }); A.keys.push(kk);
+            let san = m.cs ? (m.cs == 1 ? 'O-O' : 'O-O-O') : (u == 'P' ? (m.cap ? 'abcdefgh'[m.f & 7] + 'x' : '') : u + (m.cap ? 'x' : '')) + nm(m.t) + (m.p ? '=' + m.p : ''); san += ms.length ? (ck ? '+' : '') : (ck ? '#' : '');
+            A.log.push((w ? (A.hist.length + 1 >> 1) + '. ' : '') + san);
+            const mv = pcs.find(x => x.sq == m.f), cx = pcs.find(x => x.sq == cs && x !== mv);
+            if (cx) { pcs.splice(pcs.indexOf(cx), 1); cx.el.classList.add('cap'); setTimeout(() => cx.el.remove(), 400); burst(cs, '#fff', 14, 60); burst(cs, '#ffca28', 10, 50); $('board').classList.add('shake'); setTimeout(() => $('board').classList.remove('shake'), 400); beep(170, .18, 'sawtooth'); navigator.vibrate && navigator.vibrate(50) } else beep(m.cs ? 300 : 400, .07, 'triangle');
+            mv.sq = m.t; place(mv);
+            if (m.cs) { const h = w ? 56 : 0, r = pcs.find(x => x.sq == (m.cs == 1 ? h + 7 : h)); r.sq = m.cs == 1 ? h + 5 : h + 3; place(r) }
+            if (m.p) setTimeout(() => { mv.el.textContent = G[m.p]; burst(m.t, '#ffe082', 16, 60); beep(880, .2, 'triangle') }, 280);
+            A.s = n; A.last = [m.f, m.t]; render(); upd();
+            if (ck && ms.length) { banner('CHECK!'); beep(700, .12, 'square'); setTimeout(() => beep(900, .12, 'square'), 130) }
+            if (A.cpu) {
+                const cv = cp ? V[cp.toUpperCase()] : 0; if (mover == A.cpu) { if (cp) say(A.cpu, ['😈', '😂', 'Gotcha! 😜', 'Mine now! 😎'], cv >= 300 ? .8 : .25); if (ck) say(A.cpu, ['😈', 'Check! 😏'], .6) }
+                else { if (cv >= 300) say(A.cpu, ['😭', '😡', 'Ouch! 🤕', 'Nooo! 😱'], .8); if (ck) say(A.cpu, ['😰', 'Hmm 🤔', '😬'], .5) }
+                if (A.hist.length % 6 == 0) { const dm = matOf(n.b, A.cpu) - matOf(n.b, A.cpu == 'w' ? 'b' : 'w'); if (dm >= 300) say(A.cpu, ['😎', 'Easy! 😏', '😈'], .5); else if (dm <= -300) say(A.cpu, ['😰', '🥶', 'Hmm 🤔'], .5) }
+            }
+            await sleep(340); if (S !== A) return;
+            let why = null, win = null; if (!ms.length) { if (ck) { win = mover; why = 'Checkmate' } else why = 'Stalemate' } else if (insuf(n)) why = 'Insufficient material'; else if (n.hm >= 100) why = '50-move rule'; else if (A.keys.filter(k => k == kk).length >= 3) why = 'Threefold repetition';
+            A.busy = false; if (why) return fin(win, why); upd(); if (A.cpu == n.t) cpuGo()
+        }
+        async function cpuGo() { const A = S; if (A.over) return; A.busy = true; msg('Computer is thinking…'); await sleep(500); if (A !== S) return; const m = think(A.s, A.lv); await sleep(200); if (A !== S) return; A.busy = false; play(m) }
+        function fin(w, why) {
+            const A = S; A.over = true; A.busy = false; upd(); render();
+            if (w) { const W = pcs.find(x => x.sq == A.s.b.indexOf(w == 'w' ? 'K' : 'k')), L = pcs.find(x => x.sq == A.s.b.indexOf(w == 'w' ? 'k' : 'K')); W && W.el.classList.add('win'); if (L && why == 'Checkmate') L.el.classList.add('fall'); banner(why == 'Checkmate' ? 'CHECKMATE!' : 'GAME OVER') } else banner('DRAW');
+            beep(660, .2, 'triangle'); setTimeout(() => beep(880, .3, 'triangle'), 200);
+            if (A.cpu) say(A.cpu, w == A.cpu ? ['😎', '🏆', 'GG 🤝'] : w ? ['😭', 'Well played 🤝', '🥲'] : ['🤝', '😅'], 1);
+            setTimeout(() => {
+                if (S !== A) return; $('wt').textContent = w ? (w == 'w' ? 'White' : 'Black') + ' wins!' : 'Draw'; $('wd').textContent = (w && A.cpu ? (w == A.cpu ? 'Computer wins — ' : 'You win — ') : '') + why; $('end').classList.remove('hide');
+                if (w && w != A.cpu) for (let i = 0; i < 80; i++) { const c = document.createElement('div'); c.className = 'cf'; c.style.cssText = `left:${Math.random() * 100}%;background:${rnd(['#e53935', '#2e9e44', '#f9b600', '#1e88e5'])};animation-duration:${2 + Math.random() * 2.5}s;animation-delay:${Math.random() * 1.2}s`; document.body.appendChild(c) }
+            }, 1300)
+        }
+        function pause() { if (S && !S.over && $('menu').classList.contains('hide')) { PZ = 1; $('pz').classList.remove('hide') } }
+        function undo() { const A = S; if (!A || A.over || A.busy || PZ) return; const k = A.cpu ? 2 : 1; if (A.hist.length < k || (A.cpu && A.s.t == A.cpu)) return; let h; for (let i = 0; i < k; i++)h = A.hist.pop(); A.s = h.s; A.last = h.last; A.log.length = h.log; A.keys.length = A.hist.length + 1; A.sel = -1; A.mv = []; A.hint = null; rebuild(); render(); upd(); beep(300, .1) }
+        function sel() { const C = { m: MD, l: LV, s: SD, p: PS }; document.querySelectorAll('.opt[data-g]').forEach(b => b.classList.toggle('sel', String(C[b.dataset.g]) == b.dataset.v)) }
+        function sv() { try { localStorage.setItem('ck', JSON.stringify({ TH, PS, LV, mute })) } catch (e) { } }
+        /* ---------- events ---------- */
+        document.querySelectorAll('.opt[data-g]').forEach(b => b.onclick = () => { const v = b.dataset.v; ({ m: () => MD = v, l: () => LV = +v, s: () => SD = v, p: () => { PS = +v; document.body.dataset.ps = PS } })[b.dataset.g](); sel(); sv() });
+        $('grid').onclick = e => { const q = e.target.closest('.q'); if (q) tap(+q.dataset.i) };
+        $('start').onclick = start; $('again').onclick = start; $('rt').onclick = start;
+        $('mn').onclick = () => { if (S && !S.over) pause(); else $('menu').classList.remove('hide') };
+        $('rs').onclick = () => { PZ = 0; $('pz').classList.add('hide') };
+        $('hm').onclick = () => { $('pz').classList.add('hide'); $('menu').classList.remove('hide') };
+        $('hm2').onclick = () => { $('end').classList.add('hide'); $('menu').classList.remove('hide') };
+        $('rg').onclick = () => { $('pz').classList.add('hide'); PZ = 0; fin(S.cpu || (S.s.t == 'w' ? 'b' : 'w'), 'Resignation') };
+        document.addEventListener('visibilitychange', () => { if (document.hidden) pause() });
+        $('th').onclick = () => { TH = (TH + 1) % 6; document.body.dataset.th = TH; beep(600, .1); sv(); msg(['Royal Wood', 'Diwali Glow', 'Candy Land', 'Nature Park', 'Deep Ocean', 'Space Galaxy'][TH] + ' ✨') };
+        $('ps').onclick = () => { PS = (PS + 1) % 2; document.body.dataset.ps = PS; beep(500, .1); sel(); sv() };
+        $('un').onclick = undo;
+        $('fl').onclick = () => { if (S && !S.busy) { S.flip = !S.flip; rebuild(); render(); upd() } };
+        $('hn').onclick = () => { const A = S; if (!A || A.over || A.busy || A.cpu == A.s.t || PZ) return; A.busy = true; msg('Thinking…'); setTimeout(() => { if (S !== A) return; const m = think(A.s, 2); A.busy = false; A.hint = [m.f, m.t]; render(); msg('Hint: ' + nm(m.f) + ' → ' + nm(m.t)) }, 60) };
+        $('sn').onclick = () => { mute = !mute; $('sn').textContent = mute ? '🔇' : '🔊'; sv() };
+        const me = t => { if (S) react(hside(), t) };
+        document.querySelectorAll('#emo button:not(#chb)').forEach(b => b.onclick = () => me(b.textContent));
+        $('chat').innerHTML = '<div class="eg">' + EM.map(e => `<button>${e}</button>`).join('') + '</div><div class="pg">' + PH.map(e => `<button>${e}</button>`).join('') + '</div>';
+        $('chat').onclick = e => { if (e.target.tagName == 'BUTTON') { me(e.target.textContent); $('chat').classList.remove('on') } };
+        $('chb').onclick = e => { e.stopPropagation(); $('chat').classList.toggle('on') };
+        document.addEventListener('click', e => { if (!e.target.closest('#chat')) $('chat').classList.remove('on') });
+        const LUDO_URL = 'https://claude.ai/artifact/Wd79kkioBB7S4XaRuf4iva'; /* put your Ludo King GitHub Pages link here */
+        const AD = `<a class="ad" href="${LUDO_URL}" target="_blank" rel="noopener"><div class="ic">🎲</div><div><b>LUDO KING</b><small>Roll • Race • Win!<br>Made by Keshav Mishra</small></div><u>PLAY</u><em>AD</em></a>`;
+        ['#menu', '#pz', '#end'].forEach(q => { const d = document.createElement('div'); d.innerHTML = AD; document.querySelector(q + ' .card').appendChild(d.firstChild) });
+        { const d = document.createElement('div'); d.id = 'adc'; d.innerHTML = AD; document.body.appendChild(d) }
+        try { const L = JSON.parse(localStorage.getItem('ck') || '{}'); TH = (L.TH | 0) % 6; PS = Math.min(L.PS | 0, 1); LV = L.LV ?? 2; mute = !!L.mute } catch (e) { }
+        document.body.dataset.th = TH; document.body.dataset.ps = PS; $('sn').textContent = mute ? '🔇' : '🔊'; sel();
+        S = { s: { b: B0.slice(), t: 'w', c: 'KQkq', ep: -1, hm: 0 }, cpu: null, flip: false, sel: -1, mv: [], last: null, hint: null, hist: [], log: [], keys: [], over: true, busy: false, lv: LV }; rebuild(); upd(); msg('Welcome!');
+        setTimeout(() => $('spl').classList.add('out'), 1900); setTimeout(() => $('spl').remove(), 2600);
+    </script>
+</body>
+
+</html>
