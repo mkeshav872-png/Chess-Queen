@@ -25,7 +25,7 @@
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
 ![Web Audio](https://img.shields.io/badge/Web_Audio_API-7A6CFF?style=flat-square)
 ![GitHub Pages](https://img.shields.io/badge/Hosted_on-GitHub_Pages-222222?style=flat-square&logo=github&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+![License](https://img.shields.io/badge/License-All_Rights_Reserved-lightgrey?style=flat-square)
 
 </div>
 
@@ -102,7 +102,7 @@ Chess-Queen/
 │
 ├── 📄 index.html      ← Poora game (single file)
 ├── 🖼️ Chess-Queen-thumbnail.jpg ← Game thumbnail
-├── 📜 LICENSE         ← MIT License
+├── 📜 LICENSE         ← All Rights Reserved (view only)
 └── 📘 README.md       ← Ye file
 ```
 
@@ -149,7 +149,7 @@ cd Chess-Queen
 
 ## 📄 License
 
-Ye project [MIT License](./LICENSE) ke under hai. 🙏
+Ye project sirf dekhne aur seekhne ke liye public hai. Bina permission ke copy, edit ya dobara publish karna allowed nahi hai. Details: [LICENSE](./LICENSE). 🙏
 
 ---
 
