@@ -1086,7 +1086,7 @@ Chess queen · HTML
         $('chat').onclick = e => { if (e.target.tagName == 'BUTTON') { me(e.target.textContent); $('chat').classList.remove('on') } };
         $('chb').onclick = e => { e.stopPropagation(); $('chat').classList.toggle('on') };
         document.addEventListener('click', e => { if (!e.target.closest('#chat')) $('chat').classList.remove('on') });
-        const LUDO_URL = 'https://claude.ai/artifact/Wd79kkioBB7S4XaRuf4iva'; /* put your Ludo King GitHub Pages link here */
+        const LUDO_URL = 'https://mkeshav872-png.github.io/Lodu-King/';
         const AD = `<a class="ad" href="${LUDO_URL}" target="_blank" rel="noopener"><div class="ic">🎲</div><div><b>LUDO KING</b><small>Roll • Race • Win!<br>Made by Keshav Mishra</small></div><u>PLAY</u><em>AD</em></a>`;
         ['#menu', '#pz', '#end'].forEach(q => { const d = document.createElement('div'); d.innerHTML = AD; document.querySelector(q + ' .card').appendChild(d.firstChild) });
         { const d = document.createElement('div'); d.id = 'adc'; d.innerHTML = AD; document.body.appendChild(d) }
